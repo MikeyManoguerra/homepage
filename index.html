@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      font-family: 'Courier New', Courier, monospace;
+    }
+
+    body {
+      padding-top: 20px;
+      padding-bottom: 20px;
+    }
+
+    .app {
+      margin-right: 20px;
+      margin-left: 20px;
+    }
+
+    .article-wrapper {
+      display: flex;
+      align-items: flex-start;
+      gap: 15px;
+      margin-top: 10px;
+    }
+
+    input[type="checkbox"] {
+      margin-top: 2px;
+    }
+
+    ul {
+      list-style-type: none;
+      padding: 0;
+    }
+
+    h2 {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app" class="app"></div>
+</body>
+<script>
+  const app = document.getElementById('app');
+
+  const habits = [
+    {
+      url: 'https://news.ycombinator.com',
+      checked: 0,
+    },
+    {
+      url: 'https://daily.bandcamp.com',
+      checked: 0,
+    },
+    {
+      url: '',
+      checked: 0,
+    },
+    {
+      url: '',
+      checked: 0,
+    },
+    {
+      url: '',
+      checked: 0,
+    },
+    {
+      url: '',
+      checked: 0,
+    },
+    {
+      url: '',
+      checked: 0,
+    },
+  ];
+
+  const resources = [
+    {
+      url: 'https://search.marginalia.nu/',
+      checked: 0,
+    },
+    {
+      url: 'https://trails.dcnr.pa.gov/maptrails/index.html?trailid=206',
+      checked: 0,
+    },
+    {
+      url: 'https://exiftool.org/#links',
+      checked: 0,
+    },
+    {
+      url: 'https://www.animatedknots.com/ashley-bend-knot',
+      checked: 1,
+    },
+  ];
+
+  const articles = [
+    {
+      url: 'https://www.fodors.com/world/north-america/usa/california/experiences/news/heres-how-to-identify-a-california-accent',
+      checked: 0,
+    },
+    {
+      url: 'https://getpocket.com/explore/item/essential-knots-how-to-tie-the-20-knots-you-need-to-know',
+      checked: 0,
+    },
+    {
+      url: 'https://www.popularmechanics.com/science/a62073448/climate-change-bridges/',
+      checked: 0,
+    },
+    {
+      url: 'https://medium.com/eudaimonia-co/our-civilization-is-hitting-a-dead-end-because-this-is-the-age-of-extinction-3b960760cf37',
+      checked: 0,
+    },
+
+    {
+      url: '',
+      checked: 0,
+    },
+    {
+      url: '',
+      checked: 0,
+    },
+    {
+      url: '',
+      checked: 0,
+    },
+    {
+      url: '',
+      checked: 0,
+    },
+    {
+      url: '',
+      checked: 0,
+    },
+    {
+      url: '',
+      checked: 0,
+    },
+    {
+      url: '',
+      checked: 0,
+    },
+    {
+      url: '',
+      checked: 0,
+    },
+    {
+      url: '',
+      checked: 0,
+    },
+    {
+      url: '',
+      checked: 0,
+    },
+    {
+      url: '',
+      checked: 0,
+    },
+    {
+      url: '',
+      checked: 0,
+    },
+    {
+      url: '',
+      checked: 0,
+    },
+    {
+      url: '',
+      checked: 0,
+    },
+    {
+      url: '',
+      checked: 0,
+    },
+    {
+      url: '',
+      checked: 0,
+    },
+    {
+      url: '',
+      checked: 0,
+    },
+    {
+      url: '',
+      checked: 0,
+    },
+    {
+      url: '',
+      checked: 0,
+    },
+    {
+      url: '',
+      checked: 0,
+    },
+    {
+      url: '',
+      checked: 0,
+    },
+    {
+      url: '',
+      checked: 0,
+    },
+    {
+      url: '',
+      checked: 0,
+    },
+    {
+      url: '',
+      checked: 0,
+    },
+    {
+      url: '',
+      checked: 0,
+    },
+    {
+      url: '',
+      checked: 0,
+    },
+    {
+      url: '',
+      checked: 0,
+    },
+    {
+      url: '',
+      checked: 0,
+    },
+    {
+      url: '',
+      checked: 0,
+    },
+    {
+      url: '',
+      checked: 0,
+    },
+    {
+      url: '',
+      checked: 0,
+    },
+    {
+      url: '',
+      checked: 0,
+    },
+    {
+      url: '',
+      checked: 0,
+    },
+    {
+      url: '',
+      checked: 0,
+    },
+    {
+      url: '',
+      checked: 0,
+    },
+    {
+      url: '',
+      checked: 0,
+    },
+    {
+      url: '',
+      checked: 0,
+    },
+  ];
+
+  insertList(habits, 'Habits');
+  insertList(resources, 'Resources');
+  insertList(articles, 'Articles');
+
+  function insertList(list, title) {
+    const heading = document.createElement('h2');
+    heading.textContent = title;
+    app.appendChild(heading);
+    const ul = document.createElement('ul');
+
+    list.filter(({ url }) => !!url)
+      .sort((a, b) => a.checked - b.checked)
+      .forEach(({ url, checked }) => {
+        const link = document.createElement('a');
+        link.setAttribute('href', url);
+        link.textContent = url;
+
+        const checkbox = document.createElement('input');
+        checkbox.setAttribute('type', 'checkbox');
+        checkbox.setAttribute('value', url);
+
+        if (!!checked) {
+          checkbox.setAttribute('checked', true);
+        }
+
+        const wrapper = document.createElement('li');
+        wrapper.setAttribute('class', 'article-wrapper');
+
+        wrapper.appendChild(checkbox);
+        wrapper.appendChild(link);
+        ul.appendChild(wrapper);
+      })
+
+    app.appendChild(ul);
+  }
+</script>
+
+</html>

@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 
+<!-- TODO read > checked -->
+
 <head>
   <meta charset="UTF-8">
   <meta
@@ -14,6 +16,7 @@
       padding: 0;
       font-family: 'Courier New', Courier, monospace;
       color: white;
+      box-sizing: border-box;
     }
 
     button,
@@ -64,7 +67,7 @@
       margin-top: 20px;
     }
 
-    .form-group{
+    .form-group {
       display: flex;
       flex-direction: column;
       margin-top: 1rem;
@@ -84,6 +87,13 @@
       margin-top: 1rem;
     }
 
+    .app-controls {
+      display: flex;
+      gap: 0.5em;
+      justify-content: space-between;
+      margin-top: 1rem;
+    }
+
     button {
       padding: 0.5rem 1rem;
       border: none;
@@ -93,7 +103,11 @@
 </head>
 
 <body>
-  <div hidden id="landing-page" class="form-accordion">
+  <div
+    hidden
+    id="landing-page"
+    class="form-accordion"
+  >
     <h3>Sign In</h3>
     <form id="sign-in-form">
       <div class="form-group">
@@ -117,7 +131,10 @@
         />
       </div>
       <div class="form-controls">
-        <button id="sign-in-button" type="submit">Sign In</button>
+        <button
+          id="sign-in-button"
+          type="submit"
+        >Sign In</button>
       </div>
     </form>
   </div>
@@ -179,118 +196,14 @@
 
     <div id="links"></div>
 
-    <div class="form-controls">
+    <div class="app-controls">
+      <button id="toggle-checked-button">Toggle Checked</button>
       <button id="reset-password-button">reset password</button>
     </div>
   </div>
 </body>
 <script>
-  const app = document.getElementById('app');
-  const landingPage = document.getElementById('landing-page');
-  const links = document.getElementById('links');
-  const signInButton = document.getElementById('sign-in-button');
-  const addLinkForm = document.getElementById('add-link-form');
-  const categoryText = document.getElementById('link-category-text');
-  const categorySelect = document.getElementById('link-category');
-  const state = {};
 
-
-
-  categoryText.addEventListener('input', () => {
-    if (categoryText.value) {
-      categorySelect.value = '';
-    }
-  });
-
-  categorySelect.addEventListener('change', () => {
-    if (categorySelect.value) {
-      categoryText.value = '';
-    }
-  });
-
-  function insertList(list, title) {
-    const heading = document.createElement('h2');
-    heading.textContent = title;
-    links.appendChild(heading);
-    const ul = document.createElement('ul');
-
-    list.filter(({ url }) => !!url)
-      .sort((a, b) => a.checked - b.checked)
-      .forEach(({ url, checked }) => {
-        const link = document.createElement('a');
-        link.setAttribute('href', url);
-        link.textContent = url;
-
-        const checkbox = document.createElement('input');
-        checkbox.setAttribute('type', 'checkbox');
-        checkbox.setAttribute('value', url);
-
-        if (!!checked) {
-          checkbox.setAttribute('checked', true);
-        }
-
-        const wrapper = document.createElement('li');
-        wrapper.setAttribute('class', 'article-wrapper');
-
-        wrapper.appendChild(checkbox);
-        wrapper.appendChild(link);
-        ul.appendChild(wrapper);
-      })
-
-    links.appendChild(ul);
-  }
-
-  function groupLinksByCategory(links) {
-    return links.reduce((map, { url, checked, category }) => {
-      if (!category) return map;
-      if (!map[category]) {
-        map[category] = [];
-      }
-      map[category].push({ url, checked });
-      return map;
-    }, {});
-  }
-
-  function render(links) {
-    links.innerHTML = '';
-    const groupedLinks = groupLinksByCategory(links);
-    Object.entries(groupedLinks).forEach(([category, links]) => {
-      insertList(links, category);
-    });
-
-    populateCategorySelect();
-  }
-
-  function isUserLoggedIn(auth) {
-    return auth.currentUser !== null;
-  }
-
-  function hideEl(el) {
-    el.setAttribute('hidden', true);
-  }
-
-  function showEl(el) {
-    el.removeAttribute('hidden');
-  }
-
-  function linkCategories(links) {
-    return Array.from(new Set(links.map(link => link.category).filter(Boolean)));
-  }
-
-  function populateCategorySelect() {
-    const select = document.getElementById('link-category');
-    if (!select || !state.categories) return;
-    // Remove old options except the first
-    while (select.options.length > 1) {
-      select.remove(1);
-    }
-    state.categories.forEach(category => {
-      const option = document.createElement('option');
-      option.value = category;
-      option.textContent = category;
-      select.appendChild(option);
-    });
-  }
 </script>
 
 <script>
@@ -329,12 +242,40 @@
 
   // Initialize Firebase
 
+  const app = document.getElementById('app');
+  const landingPage = document.getElementById('landing-page');
+  const links = document.getElementById('links');
+  const signInButton = document.getElementById('sign-in-button');
+  const addLinkForm = document.getElementById('add-link-form');
+  const categoryText = document.getElementById('link-category-text');
+  const categorySelect = document.getElementById('link-category');
+  const toggleCheckedButton = document.getElementById('toggle-checked-button');
 
+  const state = {};
   const firebaseApp = await initializeApp(firebaseConfig);
   const auth = await getAuth(firebaseApp);
   const db = await getFirestore(firebaseApp);
+
   await auth.authStateReady();
   await init();
+
+  toggleCheckedButton.addEventListener('click', () => {
+    state.showChecked = !state.showChecked;
+    toggleCheckedButton.textContent = state.showChecked ? 'Hide Checked' : 'Show Checked';
+    render(state.links);
+  });
+
+  categoryText.addEventListener('input', () => {
+    if (categoryText.value) {
+      categorySelect.value = '';
+    }
+  });
+
+  categorySelect.addEventListener('change', () => {
+    if (categorySelect.value) {
+      categoryText.value = '';
+    }
+  });
 
   signInButton.addEventListener('click', async (event) => {
     event.preventDefault();
@@ -356,7 +297,6 @@
   });
 
   async function linkSubmit(event) {
-
     const form = event.target;
     const url = form.url.value;
     const category = form.categoryText.value || form.categorySelect.value;
@@ -370,6 +310,7 @@
     const link = createLink(url, category, read);
     await updateDocument(link);
     await fetchLinksAndAddToState();
+    render(state.links);
     form.reset();
   }
 
@@ -386,6 +327,7 @@
       showEl(app);
       hideEl(landingPage);
       await fetchLinksAndAddToState()
+
       render(state.links);
     } else {
       showEl(landingPage);
@@ -396,15 +338,16 @@
   async function fetchLinksAndAddToState() {
     try {
       const doc = await fetchDocument()
-
       state.document = doc;
       state.links = state.document.data().links;
       state.categories = linkCategories(state.links);
-    } catch (error) {
+      state.showChecked = state.showChecked ?? false
 
+    } catch (error) {
       state.document = null;
       state.links = [];
       state.categories = [];
+      state.showChecked = false
 
       alert('Error fetching links')
     }
@@ -412,10 +355,7 @@
   }
 
   async function updateDocument(link) {
-    console.log(state.document);
-
     const docRef = doc(db, "links", state.document.id);
-    console.log('docRef', docRef);
 
     await updateDoc(docRef, {
       links: arrayUnion(link)
@@ -450,23 +390,139 @@
     }
   }
 
-async function sendPasswordReset() {
-//  const actionCodeSettings = {
-//   url: 'https://www.example.com/?email=user@example.com',
-//   iOS: {
-//      bundleId: 'com.example.ios'
-//   },
-//   android: {
-//     packageName: 'com.example.android',
-//     installApp: true,
-//     minimumVersion: '12'
-//   },
-//   handleCodeInApp: true
-// };
-await sendPasswordResetEmail(auth, 'mcompendium2600@gmail.com');
-// Obtain code from user.
-// await confirmPasswordReset('user@example.com', code);
-}
+
+  function insertList(list, title) {
+    const heading = document.createElement('h2');
+    heading.textContent = title;
+    links.appendChild(heading);
+    const ul = document.createElement('ul');
+
+    list.filter(({ url }) => !!url)
+      .sort((a, b) => a.checked - b.checked)
+      .filter(({ checked }) => state.showChecked || !checked)
+      .forEach(({ url, checked }) => {
+        const link = document.createElement('a');
+        link.setAttribute('href', url);
+        link.textContent = url;
+
+        const checkbox = document.createElement('input');
+        checkbox.setAttribute('type', 'checkbox');
+        checkbox.setAttribute('value', url);
+        checkbox.setAttribute('class', 'link-checkbox');
+        addCheckboxChangeListener(checkbox);
+
+        if (!!checked) {
+          checkbox.setAttribute('checked', true);
+        }
+
+        const wrapper = document.createElement('li');
+        wrapper.setAttribute('class', 'article-wrapper');
+
+        wrapper.appendChild(checkbox);
+        wrapper.appendChild(link);
+        ul.appendChild(wrapper);
+      })
+
+    links.appendChild(ul);
+  }
+
+  async function addCheckboxChangeListener(el) {
+    el.addEventListener('change', async (event) => {
+      const isChecked = event.target.checked;
+      const linkUrl = event.target.value;
+      const docRef = doc(db, "links", state.document.id);
+
+      const updatedLinks = state.links.map((link) => {
+        if (link.url !== linkUrl) return link
+
+        return { ...link, read: isChecked }
+
+      })
+
+      await updateDoc(docRef, {
+        links: updatedLinks
+      });
+
+      await fetchLinksAndAddToState();
+      render(state.links);
+    });
+  }
+
+
+  function groupLinksByCategory(links) {
+    return links.reduce((map, { url, read, category }) => {
+      if (!category) return map;
+      if (!map[category]) {
+        map[category] = [];
+      }
+      map[category].push({ url, checked: read });
+      return map;
+    }, {});
+  }
+
+  function render(links) {
+    clearDom();
+    const groupedLinks = groupLinksByCategory(links);
+    Object.entries(groupedLinks).forEach(([category, links]) => {
+      insertList(links, category);
+    });
+
+    populateCategorySelect();
+  }
+
+  function clearDom() {
+    document.querySelectorAll('.link-checkbox').forEach(el => el.removeEventListener('change', () => { }));
+    links.innerHTML = '';
+  }
+
+  function isUserLoggedIn(auth) {
+    return auth.currentUser !== null;
+  }
+
+  function hideEl(el) {
+    el.setAttribute('hidden', true);
+  }
+
+  function showEl(el) {
+    el.removeAttribute('hidden');
+  }
+
+  function linkCategories(links) {
+    return Array.from(new Set(links.map(link => link.category).filter(Boolean)));
+  }
+
+  function populateCategorySelect() {
+    const select = document.getElementById('link-category');
+    if (!select || !state.categories) return;
+    // Remove old options except the first
+    while (select.options.length > 1) {
+      select.remove(1);
+    }
+    state.categories.forEach(category => {
+      const option = document.createElement('option');
+      option.value = category;
+      option.textContent = category;
+      select.appendChild(option);
+    });
+  }
+
+  async function sendPasswordReset() {
+    //  const actionCodeSettings = {
+    //   url: 'https://www.example.com/?email=user@example.com',
+    //   iOS: {
+    //      bundleId: 'com.example.ios'
+    //   },
+    //   android: {
+    //     packageName: 'com.example.android',
+    //     installApp: true,
+    //     minimumVersion: '12'
+    //   },
+    //   handleCodeInApp: true
+    // };
+    await sendPasswordResetEmail(auth, auth.currentUser.email);
+    // Obtain code from user.
+    // await confirmPasswordReset('user@example.com', code);
+  }
 </script>
 
 </html>

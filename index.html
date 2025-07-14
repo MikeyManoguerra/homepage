@@ -1,7 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<!-- TODO read > checked -->
+<!-- TODO
+  read > checked
+  soft delete links
+  -->
 
 <head>
   <meta charset="UTF-8">
@@ -398,6 +401,10 @@
     const ul = document.createElement('ul');
 
     list.filter(({ url }) => !!url)
+      .sort((a, b) => {
+        const strip = url => url.replace(/^https?:\/\//, '');
+        return strip(a.url).localeCompare(strip(b.url));
+      })
       .sort((a, b) => a.checked - b.checked)
       .filter(({ checked }) => state.showChecked || !checked)
       .forEach(({ url, checked }) => {

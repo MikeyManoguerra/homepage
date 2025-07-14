@@ -93,7 +93,7 @@
 </head>
 
 <body>
-  <div id="landing-page" class="form-accordion">
+  <div hidden id="landing-page" class="form-accordion">
     <h3>Sign In</h3>
     <form id="sign-in-form">
       <div class="form-group">
@@ -125,6 +125,7 @@
   <div
     id="app"
     class="app"
+    hidden
   >
     <details class="form-accordion">
       <summary>Add Link</summary>
@@ -178,7 +179,7 @@
 
     <div id="links"></div>
 
-    <div>
+    <div class="form-controls">
       <button id="reset-password-button">reset password</button>
     </div>
   </div>
@@ -442,7 +443,7 @@
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       await fetchLinksAndAddToState()
-      render(state.links);
+      init(); //TODO not ideal to call init here
 
     } catch (error) {
       alert("Sign-in error: " + error.message);

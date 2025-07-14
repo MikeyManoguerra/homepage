@@ -403,6 +403,8 @@
       .forEach(({ url, checked }) => {
         const link = document.createElement('a');
         link.setAttribute('href', url);
+        link.setAttribute('target', '_blank');
+        link.setAttribute('rel', 'noopener noreferrer');
         link.textContent = url;
 
         const checkbox = document.createElement('input');
